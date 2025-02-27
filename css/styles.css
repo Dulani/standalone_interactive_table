@@ -220,3 +220,29 @@
             content: '↓';
             opacity: 1;
         }
+
+/* jstree styling */
+#lawClassTree {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 0.9em;
+}
+.jstree-default .jstree-anchor {
+    color: #495057;
+    padding: 2px 5px;
+}
+.jstree-default .jstree-clicked {
+    background: #007bff;
+    color: white;
+    border-radius: 3px;
+}
+.jstree-default .jstree-hovered {
+    background: #e9ecef;
+    border-radius: 3px;
+}
+.jstree-default .jstree-icon {
+    color: #6c757d;
+}
