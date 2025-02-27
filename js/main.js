@@ -31,8 +31,8 @@ function applyYearFilter(data, yearStart, yearEnd) {
 }
 
 function applyLawFilter(data, selectedFilters) {
-    // If no filters are selected, return all data
-    if (!selectedFilters.length) return data;
+    // If no filters are selected, return no data
+    if (!selectedFilters.length) return [];
     
     return data.filter(row => {
         // Check if the law_class is selected
@@ -346,6 +346,19 @@ function setupControls() {
         // Select all nodes initially
         $(this).jstree('select_all');
     }).on('changed.jstree', function (e, data) {
+        renderTable();
+    });
+    
+    // Set up clear all and select all links
+    document.getElementById('clearLawSelections').addEventListener('click', function(e) {
+        e.preventDefault();
+        $('#lawClassTree').jstree('deselect_all');
+        renderTable();
+    });
+    
+    document.getElementById('selectAllLaws').addEventListener('click', function(e) {
+        e.preventDefault();
+        $('#lawClassTree').jstree('select_all');
         renderTable();
     });
 }
