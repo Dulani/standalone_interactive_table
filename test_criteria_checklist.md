@@ -1,33 +1,25 @@
-# Test Criteria Checklist for jstree Implementation
+# Test Criteria Checklist for Issue #21
 
-## Functionality Tests
-- [ ] The tree structure displays all law classes in the proper hierarchy
-- [ ] The tree structure displays all law subclasses under their respective law classes
-- [ ] Clicking on a law class expands/collapses its subclasses
-- [ ] Selecting a law class filters the table to show only rows with that law class
-- [ ] Selecting a law subclass filters the table to show only rows with that specific subclass
-- [ ] Multiple selections work correctly (selecting multiple law classes and/or subclasses)
-- [ ] Deselecting a law class removes the filter for that class
-- [ ] Deselecting a law subclass removes the filter for that subclass
+## Year Filter Tests
+- [ ] Year slider has two handles that can be dragged
+- [ ] Min year handle updates the min year display when dragged
+- [ ] Max year handle updates the max year display when dragged
+- [ ] Min handle cannot be dragged past the max handle
+- [ ] Max handle cannot be dragged past the min handle
+- [ ] Table data is filtered correctly when min year is changed
+- [ ] Table data is filtered correctly when max year is changed
+- [ ] Track between handles is highlighted correctly
 
-## Integration Tests
-- [ ] Year range filter still works correctly with jstree implementation
-- [ ] State filter still works correctly with jstree implementation
-- [ ] Search functionality still works correctly with jstree implementation
-- [ ] Pagination still works correctly with jstree implementation
-- [ ] Sorting still works correctly with jstree implementation
+## Law Class Filter Tests
+- [ ] All law classes are initially selected/checked
+- [ ] Unchecking a law class removes its rows from the table
+- [ ] Checking a previously unchecked law class adds its rows back to the table
+- [ ] Unchecking a parent law class unchecks all its subtypes
+- [ ] Checking a parent law class checks all its subtypes
+- [ ] Unchecking all subtypes of a law class shows the parent as indeterminate
+- [ ] Table data is filtered correctly based on selected law classes and subtypes
 
-## UI/UX Tests
-- [ ] The jstree component is styled consistently with the rest of the application
-- [ ] The application is responsive and mobile-friendly
-- [ ] The jstree component is properly contained within the sidebar
-- [ ] The checkbox states are clearly visible and intuitive
-
-## Performance Tests
-- [ ] The page loads without significant delay
-- [ ] Expanding/collapsing tree nodes is responsive
-- [ ] Filtering the table based on tree selections is responsive
-
-## Browser Compatibility
-- [ ] The implementation works correctly in Chrome
-- [ ] The implementation works correctly in Firefox (if available)
+## Combined Filter Tests
+- [ ] Year and law class filters work together correctly
+- [ ] Search filter works with year and law class filters
+- [ ] Pagination works correctly with filtered data
