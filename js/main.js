@@ -31,7 +31,9 @@ function applyYearFilter(data, yearStart, yearEnd) {
 }
 
 function applyLawFilter(data, selectedFilters) {
-    if (!selectedFilters.length) return data;
+    // If no filters are selected, return no data
+    if (!selectedFilters.length) return [];
+    
     return data.filter(row => {
         // Check if the law_class is selected
         if (selectedFilters.includes(row.law_class)) return true;
@@ -103,8 +105,10 @@ function renderTable() {
     });
     thead.appendChild(headerRow);
     
+    // Start with fresh data for each render
+    let displayData = [...tableData];
+    
     // Apply filters and sorting
-    let displayData = [...filteredData];
     const searchTerm = document.getElementById('searchInput').value;
     displayData = applySearchFilter(displayData, searchTerm);
     
@@ -114,8 +118,14 @@ function renderTable() {
     displayData = applyYearFilter(displayData, yearStart, yearEnd);
     
     // Get selected law classes and subtypes from jstree
-    const selectedLaws = $('#lawClassTree').jstree('get_selected', true).map(node => node.original.value);
-    displayData = applyLawFilter(displayData, selectedLaws);
+    const selectedNodes = $('#lawClassTree').jstree('get_selected', true);
+    const selectedLaws = selectedNodes.map(node => node.original ? node.original.text : null).filter(Boolean);
+    console.log('Selected laws for filtering:', selectedLaws);
+    
+    // Filter out rows where law_class is not in selectedLaws
+    displayData = displayData.filter(row => {
+        return selectedLaws.includes(row.law_class);
+    });
     
     // Sort data
     displayData = sortData(displayData, sortColumn);
@@ -159,6 +169,99 @@ function setupControls() {
             renderTable();
         }
     });
+    
+    // Set up year slider functionality
+    const yearSlider = document.getElementById('yearSlider');
+    const minYearHandle = document.getElementById('minYearHandle');
+    const maxYearHandle = document.getElementById('maxYearHandle');
+    const minYearDisplay = document.getElementById('minYearDisplay');
+    const maxYearDisplay = document.getElementById('maxYearDisplay');
+    const track = document.querySelector('.year-slider .track');
+    
+    // Find min and max years in the data
+    const years = tableData.map(row => row.year);
+    const minYear = Math.min(...years);
+    const maxYear = Math.max(...years);
+    
+    // Initialize year display values
+    minYearDisplay.textContent = minYear;
+    maxYearDisplay.textContent = maxYear;
+    
+    // Initialize handle positions
+    const sliderWidth = yearSlider.offsetWidth;
+    minYearHandle.style.left = '0%';
+    maxYearHandle.style.left = '100%';
+    track.style.left = '0%';
+    track.style.width = '100%';
+    
+    // Function to update track appearance
+    function updateTrack() {
+        const minPos = parseFloat(minYearHandle.style.left);
+        const maxPos = parseFloat(maxYearHandle.style.left);
+        track.style.left = `${minPos}%`;
+        track.style.width = `${maxPos - minPos}%`;
+    }
+    
+    // Function to convert position to year
+    function posToYear(position) {
+        const percentage = position / 100;
+        return Math.round(minYear + percentage * (maxYear - minYear));
+    }
+    
+    // Function to convert year to position
+    function yearToPos(year) {
+        return ((year - minYear) / (maxYear - minYear)) * 100;
+    }
+    
+    // Function to handle drag events
+    function handleDrag(handle, display, isMin) {
+        let isDragging = false;
+        
+        handle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            e.preventDefault();
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            const sliderRect = yearSlider.getBoundingClientRect();
+            let position = ((e.clientX - sliderRect.left) / sliderRect.width) * 100;
+            
+            // Constrain position within slider bounds
+            position = Math.max(0, Math.min(100, position));
+            
+            // Prevent handles from crossing each other
+            if (isMin) {
+                const maxPos = parseFloat(maxYearHandle.style.left);
+                position = Math.min(position, maxPos - 5);
+            } else {
+                const minPos = parseFloat(minYearHandle.style.left);
+                position = Math.max(position, minPos + 5);
+            }
+            
+            // Update handle position
+            handle.style.left = `${position}%`;
+            
+            // Update year display
+            const year = posToYear(position);
+            display.textContent = year;
+            
+            // Update track appearance
+            updateTrack();
+            
+            // Update table with filtered data
+            renderTable();
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    }
+    
+    // Set up drag functionality for both handles
+    handleDrag(minYearHandle, minYearDisplay, true);
+    handleDrag(maxYearHandle, maxYearDisplay, false);
     
     // Set up law class tree with jstree
     // Create direct jstree data structure
@@ -239,7 +342,23 @@ function setupControls() {
                 icon: 'jstree-file'
             }
         }
+    }).on('ready.jstree', function() {
+        // Select all nodes initially
+        $(this).jstree('select_all');
     }).on('changed.jstree', function (e, data) {
+        renderTable();
+    });
+    
+    // Set up clear all and select all links
+    document.getElementById('clearLawSelections').addEventListener('click', function(e) {
+        e.preventDefault();
+        $('#lawClassTree').jstree('deselect_all');
+        renderTable();
+    });
+    
+    document.getElementById('selectAllLaws').addEventListener('click', function(e) {
+        e.preventDefault();
+        $('#lawClassTree').jstree('select_all');
         renderTable();
     });
 }
